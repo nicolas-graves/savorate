@@ -31,6 +31,7 @@
   (specifications->packages
    '("python-mypy"
      "python-pandas"
+     "python-pandas-flavor"
      "python-pytest"
      "python-toolz"
      "python-wrapper"

@@ -12,6 +12,7 @@ from savorate.tree import (
 from savorate.aggregate import (
     df_aggregate,
     total_aggregate,
+    nested_aggregate,
     assoc_df,
     distribute_flows,
     update_flow,
@@ -19,10 +20,12 @@ from savorate.aggregate import (
 )
 
 
+all_products = list(map(lambda n: "P" + str(n), np.arange(8, 28)))
+base_flows = ["NRGSUP", "TI_E", "TO", "NRG_E", "DL"]
+
+
 @pytest.fixture
 def raw_eb():
-    all_products = list(map(lambda n: "P" + str(n), np.arange(8, 28)))
-    base_flows = ["NRGSUP", "TI_E", "TO", "NRG_E", "DL"]
     checks = {
         "nrg_bal": dict_to_tree({"AFC": base_flows}),
         "siec": dict_to_tree({"TOTAL": all_products}),
@@ -104,6 +107,26 @@ def test_total_aggregate_nrg_bal(raw_eb):
 
     # computed
     C = total_aggregate(A, checks["nrg_bal"])
+    pd.testing.assert_series_equal(B, C.loc[B.index])
+
+
+def test_nested_aggregate_siec(raw_eb):
+    A, checks = raw_eb
+    B = A.copy()
+    B = df_aggregate(B, checks["siec"], "TOTAL")
+
+    # computed
+    C = A.nested_aggregate({"TOTAL": all_products})
+    pd.testing.assert_series_equal(B, C.loc[B.index])
+
+
+def test_nested_aggregate_nrg_bal(raw_eb):
+    A, checks = raw_eb
+    B = A.copy()
+    B = df_aggregate(B, checks["nrg_bal"], "AFC")
+
+    # computed
+    C = A.nested_aggregate({"AFC": base_flows})
     pd.testing.assert_series_equal(B, C.loc[B.index])
 
 

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from pandas import IndexSlice as idx
+import pandas_flavor as pf
 from typing import (
     cast,
     Callable,
@@ -11,7 +12,7 @@ from typing import (
     Union,
 )
 from treelib import Tree
-from .tree import node_names
+from .tree import dict_to_tree, node_names
 from functools import reduce
 from toolz import valmap, valfilter
 
@@ -77,7 +78,7 @@ def df_aggregate(
     return pd.Series(aggregate[aggregate.columns[0]], index=aggregate.index)
 
 
-def total_aggregate(frame, tree, region=slice(None)):
+def total_aggregate(frame, tree: Tree, region=slice(None)):
     """Aggregate all keys from tree in order."""
     aggregation_order = list(
         reversed(
@@ -94,6 +95,12 @@ def total_aggregate(frame, tree, region=slice(None)):
         aggregation_order,
         frame,
     )
+
+
+@pf.register_dataframe_method
+@pf.register_series_method
+def nested_aggregate(frame, dic: dict, region=slice(None)):
+    return total_aggregate(frame, dict_to_tree(dic), region)
 
 
 def check_sums(
