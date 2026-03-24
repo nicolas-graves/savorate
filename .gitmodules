@@ -1,3 +1,0 @@
-[submodule "lib/treelib"]
-	path = savorate/lib/treelib
-	url = https://github.com/nicolas-graves/treelib
